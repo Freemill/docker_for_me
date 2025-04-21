@@ -304,7 +304,7 @@ docker run -it -v ./:app -p 8000:8000 node:alpine sh
 <br>
 호스트 pc에도 동일하게 적용이 돼있다. 
 
-![img_82.png](img_82.png)
+![img_82.png](img_82.pnㅈg)
 ![img_84.png](img_84.png)
 <br>
 정상적으로 실행이 된다. <br>
