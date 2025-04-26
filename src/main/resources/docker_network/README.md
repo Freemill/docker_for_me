@@ -415,7 +415,8 @@ container를 종료해보자. <br>
 docker run --rm -it --network my-network ubuntu:16.04 bash
 ```
 ![img_116.png](img_116.png)
-volume mount 옵션을 실행하지 않았기 때문에 app이라는 directory가 생성되지 않는다. <br>
+volume mount 옵션을 실행하지 않았기
+때문에 app이라는 directory가 생성되지 않는다. <br>
 exit로 나오고 이번에는 volume mount 옵션을 부여한 상태에서 컨테이너를 실행해보자. <br>
 ```shell
 docker run --rm -it --network my-network --volume my-volume:/app/test ubuntu:16.04 bash
@@ -424,5 +425,79 @@ docker run --rm -it --network my-network --volume my-volume:/app/test ubuntu:16.
 ![img_118.png](img_118.png)
 hello.txt가 있는 것을 확인할 수 있다. 이 말은 이전의 데이터를 확인할 수 있다는 것이다. host에 연결해 줌으로써 데이터를 영속적으로 사용할 수 있다.<br>
 
+<br>
+<br>
+이번에는 컨테이너와 볼륨을 연결할 때, 특정한 volume mount를 지정하는 것이 아니라 host에 있는 directory를 찍어서 연결해 보자. <br>\
+
+![img_119.png](img_119.png)
+현재 기동중인 컨테이너는 하나 밖에 없다. <br>
+```shell
+docker run --rm -it --network my-network -v ./docker_volume_test:/app/test ubuntu:16.04 bash
+# .으로 하면 현재 directory를 의미한다. 그러니까 즉, 현재 위치에서 /docker_volume_test라는 directory를 찍어서 연결하겠다는 의미이다. <br>
+```
+그런데 이걸 실행하기 전에 현재 디렉토리 위치와 현재 디렉토리에 들어있는 포함 돼 있는 directory를 확인한다. <br>
+현재 directory에 docker_volume_test가 있으면 삭제하자. <br>
+```shell
+pwd
+ls -al
+rm -rf docker_volume_test
+```
+![img_120.png](img_120.png)
+이렇게 할 때 만약 docker_volume_test가 존재하지 않는다면 docker_volume_test라는 directory를 자동으로 생성한다. <br>
+ubuntu안에서 app/test에 들어가보자. <br>
+![img_121.png](img_121.png)
+그럼 여기에 파일을 만들고 host pc와 연결 돼 있는지 확인해보자. <br>
+![img_122.png](img_122.png)
+![img_123.png](img_123.png)
+![img_124.png](img_124.png)
+이건 host pc에 적용된 파일도 컨테이너에 적용됨. <br>
+volume mount를 함으로써 현재 컨테이너를 삭제하고 새로운 컨테이너를 실행시킬 때 host pc에 있는 directory를 찍어서 연결해주면 <br>
+데이터를 영속적으로 사용할 수 있다. <br>
+
+<br>
+그런데 만약 이 상태에서 database를 새롭게 시작해본다고 가정해보자. <br>
+
+```shell
+docker run -d -p 8088:8088 --network my-network \
+        -e "spring.datasource.url=jdbc:mariadb://my-mariadb:3306/mydb" \
+        --name my-mariadb edowon0623/my-mariadb:1.0
+```
+![img_125.png](img_125.png)
+![img_126.png](img_126.png)
+```shell
+docker inspect [Container ID]
+```
+
+![img_127.png](img_127.png)
+![img_128.png](img_128.png)
+띄운 컨테이너의 Mounts를 확인해보면 <br>
+![img_129.png](img_129.png)
+"Name"에 새로운 volume이 생성된 것을 확인할 수 있다. <br>
+![img_130.png](img_130.png)
+그리고 volume의 list를 확인해보면 새로운 volume이 생성된 것을 확인할 수 있다. <br>
+이렇게 되면 기존 데이터를 사용할 수 없다! <br>
+그렇기 때문에 볼륨을 유지시키기 위해선 volume mount를 통해 데이터를 유지시기키는 작업이 필요하다. <br>
+![img_132.png](img_132.png)
+```shell
+docker volume rm [Volume ID]
+docker stop [Container ID]
+docker rm [Container ID]
+```
+새로 생긴 볼륨을 삭제하고 실행중인 container를 삭제한 후에 <br>
+```shell
+docker run -d -p 13306:3306 --network my-network \
+        -v [기존의 volume ID]:/var/lib/mysql \
+        -e MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=true \
+        -e MARIADB_DATABASE=mydb \
+        --name my-mariadb \
+        edowon0623/my-mariadb:1.0
+```
+![img_133.png](img_133.png)
+실행 시키면 기존의 volume을 사용하게 된다. <br>
+![img_134.png](img_134.png)
+![img_135.png](img_135.png)
+![img_136.png](img_136.png)
+![img_137.png](img_137.png)
+![img_138.png](img_138.png)
 
 
