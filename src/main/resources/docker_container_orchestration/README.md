@@ -648,4 +648,37 @@ docker service update --image nginx:1.24 myweb2
 
 <br>
 
+![img_126.png](img_126.png)
+코드로 실습해보자. <br>
+```shell
+docker service create --name myweb3 --replicas 4 --rollback-delay 10s --rollback-parallelism 1 --rollback-failure-action
+pause nginx:latest
+```
+![img_127.png](img_127.png)
+```shell
+docker service ls
+```
+![img_128.png](img_128.png)
+myweb, myweb2는 사용하지 않으니 삭제한다.
+```shell
+docker service rm myweb
+docker service rm myweb2
+```
+![img_129.png](img_129.png)
+업데이트를 시킨 후 Rollback해보자. <br>
+```shell
+docker service update --image nginx:1.25 myweb3
+```
+![img_130.png](img_130.png)
+![img_131.png](img_131.png)
+한번더 업데이트
+![img_132.png](img_132.png)
+롤백 시켜보자. 
+![img_133.png](img_133.png)
+![img_134.png](img_134.png)
+![img_135.png](img_135.png)
+롤백 또 한번
+![img_137.png](img_137.png)
+![img_138.png](img_138.png)
+![img_139.png](img_139.png)
 
